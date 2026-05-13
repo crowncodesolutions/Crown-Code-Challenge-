@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Tracker — Crown Code Solutions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      min-height: 100vh;
+      padding: 30px 20px;
+      color: #333;
+    }
+
+    .container { max-width: 680px; margin: 0 auto; }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .brand svg { fill: rgba(255,255,255,0.4); }
+    .brand span {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* SUMMARY */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .summary-card {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 20px 16px;
+      color: white;
+    }
+
+    .summary-card .s-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .s-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .s-icon.balance { background: rgba(255,255,255,0.15); }
+    .s-icon.balance svg { fill: white; }
+    .s-icon.income { background: rgba(74,222,128,0.2); }
+    .s-icon.income svg { fill: #4ade80; }
+    .s-icon.expense { background: rgba(248,113,113,0.2); }
+    .s-icon.expense svg { fill: #f87171; }
+
+    .s-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .s-amount { font-size: 20px; font-weight: 800; line-height: 1; }
+    .summary-card.income .s-amount { color: #4ade80; }
+    .summary-card.expense .s-amount { color: #f87171; }
+    .summary-card.balance .s-amount { color: #ffffff; }
+
+    /* CARD */
+    .card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title svg { fill: #6c63ff; }
+
+    /* TYPE TOGGLE */
+    .type-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .type-btn {
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid #e2e6ed;
+      background: #fafbfc;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      color: #888;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .type-btn svg { fill: #aaa; transition: fill 0.2s; }
+    .type-btn.active-income { background: #e8fff4; border-color: #22c55e; color: #15803d; }
+    .type-btn.active-income svg { fill: #22c55e; }
+    .type-btn.active-expense { background: #fff0f0; border-color: #ef4444; color: #b91c1c; }
+    .type-btn.active-expense svg { fill: #ef4444; }
+
+    input, select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1.5px solid #e2e6ed;
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      color: #2d2d3a;
+      background: #fafbfc;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      margin-bottom: 12px;
+    }
+
+    input:focus, select:focus {
+      border-color: #6c63ff;
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+      background: #fff;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-row input, .form-row select { margin-bottom: 0; }
+    .form-row-wrap { margin-bottom: 12px; }
+
+    .add-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #6c63ff, #a855f7);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+      box-shadow: 0 8px 20px rgba(108,99,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .add-btn svg { fill: white; }
+    .add-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(108,99,255,0.4); }
+
+    /* FILTER */
+    .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+
+    .filter-btn {
+      padding: 7px 16px;
+      border-radius: 100px;
+      border: 1.5px solid #e2e6ed;
+      background: #fafbfc;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      color: #888;
+    }
+
+    .filter-btn.active { background: #6c63ff; border-color: #6c63ff; color: white; }
+
+    /* TRANSACTIONS */
+    #transactionList {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    #transactionList::-webkit-scrollbar { width: 4px; }
+    #transactionList::-webkit-scrollbar-thumb { background: #e0e0f0; border-radius: 4px; }
+
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: #fafbfc;
+      border-radius: 14px;
+      border: 1.5px solid #f0f0f5;
+      transition: all 0.2s;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .transaction-item:hover { border-color: #e0e0ff; background: #f8f8ff; }
+
+    .tx-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .tx-icon.income { background: #e8fff4; }
+    .tx-icon.income svg { fill: #22c55e; }
+    .tx-icon.expense { background: #fff0f0; }
+    .tx-icon.expense svg { fill: #ef4444; }
+
+    .tx-info { flex: 1; min-width: 0; }
+    .tx-name { font-weight: 600; color: #1a1a2e; font-size: 14px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .tx-meta { font-size: 12px; color: #aaa; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+    .tx-category {
+      background: #f0f0f8;
+      color: #6c63ff;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .tx-amount { font-weight: 800; font-size: 15px; flex-shrink: 0; }
+    .tx-amount.income { color: #22c55e; }
+    .tx-amount.expense { color: #ef4444; }
+
+    .tx-delete {
+      background: none;
+      border: none;
+      color: #ddd;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .tx-delete svg { fill: #ccc; transition: fill 0.2s; }
+    .tx-delete:hover { background: #fff0f0; }
+    .tx-delete:hover svg { fill: #ef4444; }
+
+    .empty-state { text-align: center; padding: 40px 20px; }
+    .empty-icon {
+      width: 56px;
+      height: 56px;
+      background: #f4f6ff;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+    }
+
+    .empty-icon svg { fill: #c5c9e8; }
+    .empty-state p { font-size: 14px; color: #bbb; }
+
+    @media (max-width: 500px) {
+      .summary-grid { grid-template-columns: 1fr; gap: 10px; }
+      .form-row { grid-template-columns: 1fr; }
+      .form-row input, .form-row select { margin-bottom: 12px; }
+      .form-row input:last-child, .form-row select:last-child { margin-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <div class="brand">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      <span>Crown Code Solutions</span>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-grid">
+      <div class="summary-card balance">
+        <div class="s-top">
+          <div class="s-icon balance">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+          </div>
+          <div class="s-label">Balance</div>
+        </div>
+        <div class="s-amount" id="totalBalance">₦0.00</div>
+      </div>
+      <div class="summary-card income">
+        <div class="s-top">
+          <div class="s-icon income">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z" transform="rotate(180 12 12)"/></svg>
+          </div>
+          <div class="s-label">Income</div>
+        </div>
+        <div class="s-amount" id="totalIncome">₦0.00</div>
+      </div>
+      <div class="summary-card expense">
+        <div class="s-top">
+          <div class="s-icon expense">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
+          </div>
+          <div class="s-label">Expenses</div>
+        </div>
+        <div class="s-amount" id="totalExpense">₦0.00</div>
+      </div>
+    </div>
+
+    <!-- ADD TRANSACTION -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        Add Transaction
+      </div>
+
+      <div class="type-toggle">
+        <button class="type-btn active-income" id="incomeBtn" onclick="setType('income')">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z" transform="rotate(180 12 12)"/></svg>
+          Income
+        </button>
+        <button class="type-btn" id="expenseBtn" onclick="setType('expense')">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
+          Expense
+        </button>
+      </div>
+
+      <input type="text" id="txName" placeholder="Description e.g. Salary, Rent, Food">
+
+      <div class="form-row form-row-wrap">
+        <input type="number" id="txAmount" placeholder="Amount (N)" min="0" step="0.01">
+        <select id="txCategory">
+          <option value="" disabled selected>Category</option>
+          <optgroup label="Income">
+            <option value="Salary">Salary</option>
+            <option value="Freelance">Freelance</option>
+            <option value="Business">Business</option>
+            <option value="Gift">Gift</option>
+            <option value="Other Income">Other Income</option>
+          </optgroup>
+          <optgroup label="Expenses">
+            <option value="Food">Food</option>
+            <option value="Transport">Transport</option>
+            <option value="Rent">Rent</option>
+            <option value="Bills">Bills</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Health">Health</option>
+            <option value="Education">Education</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Other">Other</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <input type="date" id="txDate">
+
+      <button class="add-btn" id="addBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        Add Transaction
+      </button>
+    </div>
+
+    <!-- TRANSACTION LIST -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+        Transactions
+      </div>
+
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="filterTransactions('all', this)">All</button>
+        <button class="filter-btn" onclick="filterTransactions('income', this)">Income</button>
+        <button class="filter-btn" onclick="filterTransactions('expense', this)">Expenses</button>
+      </div>
+
+      <div id="transactionList">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+          </div>
+          <p>No transactions yet. Add one above.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let transactions = [];
+    let currentType = 'income';
+    let currentFilter = 'all';
+
+    const categoryIcons = {
+      Salary: '<path d="M20 6h-2.18c.07-.44.18-.88.18-1.34C18 2.06 15.96 0 13.5 0c-1.3 0-2.51.56-3.36 1.5L9 3 7.86 1.5C7.01.56 5.8 0 4.5 0 2.04 0 0 2.06 0 4.66c0 .46.11.9.18 1.34H0v2h20V6zm-9.5 0H5.08c-.07-.31-.08-.63-.08-.96C5 2.69 6.43 1.34 7.8 1.34c.96 0 1.81.52 2.41 1.35L12 5 10.5 6zm5-.96c0 .33-.01.65-.08.96H12L10.5 5l1.79-3.31C12.89 1.86 13.69 1.34 14.5 1.34 15.87 1.34 17 2.69 17 5.04zM0 19c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8H0v11z"/>',
+      Freelance: '<path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/>',
+      Business: '<path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>',
+      Gift: '<path d="M20 6h-2.18c.07-.44.18-.88.18-1.34C18 2.06 15.96 0 13.5 0c-1.3 0-2.51.56-3.36 1.5L9 3 7.86 1.5C7.01.56 5.8 0 4.5 0 2.04 0 0 2.06 0 4.66c0 .46.11.9.18 1.34H0v2h20V6zM0 19c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8H0v11z"/>',
+      Food: '<path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-3.5-2.33-5.97-8.03-5.97C3.32 9.02 1 11.47 1 15h15.03z"/>',
+      Transport: '<path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>',
+      Rent: '<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>',
+      Bills: '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/>',
+      Shopping: '<path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>',
+      Health: '<path d="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/>',
+      Education: '<path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>',
+      Entertainment: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>',
+      Other: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>',
+      'Other Income': '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>'
+    };
+
+    function setType(type) {
+      currentType = type;
+      const incomeBtn = document.getElementById('incomeBtn');
+      const expenseBtn = document.getElementById('expenseBtn');
+      incomeBtn.className = type === 'income' ? 'type-btn active-income' : 'type-btn';
+      expenseBtn.className = type === 'expense' ? 'type-btn active-expense' : 'type-btn';
+    }
+
+    function formatAmount(amount) {
+      return 'N' + amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function updateSummary() {
+      const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+      document.getElementById('totalIncome').textContent = formatAmount(income);
+      document.getElementById('totalExpense').textContent = formatAmount(expense);
+      document.getElementById('totalBalance').textContent = formatAmount(income - expense);
+    }
+
+    function getIcon(category) {
+      return categoryIcons[category] || categoryIcons['Other'];
+    }
+
+    function renderTransactions() {
+      const list = document.getElementById('transactionList');
+      const filtered = currentFilter === 'all' ? transactions : transactions.filter(t => t.type === currentFilter);
+
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+            </div>
+            <p>No transactions found.</p>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(t => `
+        <div class="transaction-item" id="tx-${t.id}">
+          <div class="tx-icon ${t.type}">
+            <svg width="20" height="20" viewBox="0 0 24 24">${getIcon(t.category)}</svg>
+          </div>
+          <div class="tx-info">
+            <div class="tx-name">${t.name}</div>
+            <div class="tx-meta">
+              <span class="tx-category">${t.category}</span>
+              <span>${t.date}</span>
+            </div>
+          </div>
+          <div class="tx-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatAmount(t.amount)}</div>
+          <button class="tx-delete" onclick="deleteTransaction(${t.id})">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function addTransaction() {
+      const name = document.getElementById('txName').value.trim();
+      const amount = parseFloat(document.getElementById('txAmount').value);
+      const category = document.getElementById('txCategory').value;
+      const date = document.getElementById('txDate').value;
+
+      if (!name || !amount || !category || !date) {
+        alert('Please fill in all fields before adding a transaction.');
+        return;
+      }
+      if (amount <= 0) { alert('Amount must be greater than zero.'); return; }
+
+      transactions.unshift({ id: Date.now(), name, amount, category, date, type: currentType });
+      updateSummary();
+      renderTransactions();
+
+      document.getElementById('txName').value = '';
+      document.getElementById('txAmount').value = '';
+      document.getElementById('txCategory').value = '';
+      document.getElementById('txDate').valueAsDate = new Date();
+    }
+
+    function deleteTransaction(id) {
+      transactions = transactions.filter(t => t.id !== id);
+      updateSummary();
+      renderTransactions();
+    }
+
+    function filterTransactions(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTransactions();
+    }
+
+    document.getElementById('addBtn').addEventListener('click', addTransaction);
+    document.getElementById('txDate').valueAsDate = new Date();
+  </script>
+
+</body>
+</html>

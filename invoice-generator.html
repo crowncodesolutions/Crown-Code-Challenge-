@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Generator — Crown Code Solutions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f0 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 850px;
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 6px 12px rgba(0, 0, 0, 0.04);
+      padding: 36px 32px;
+      margin: 20px 0;
+      transition: all 0.2s ease;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .header svg {
+      width: 42px;
+      height: 42px;
+      fill: #6c63ff;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e1e2f;
+      letter-spacing: -0.3px;
+    }
+
+    .form-section {
+      background: #f9fafc;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #6c63ff;
+      margin: 20px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    h2::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: #6c63ff;
+      border-radius: 2px;
+    }
+
+    h2:first-of-type {
+      margin-top: 0;
+    }
+
+    input,
+    .item-row input {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      border: 1.5px solid #e2e6ed;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      color: #2d2d3a;
+      background: #ffffff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #6c63ff;
+      box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+    }
+
+    .item-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .item-row input {
+      margin-bottom: 0;
+      flex: 1;
+    }
+
+    #itemsContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #ffffff;
+      color: #1e1e2f;
+      border: 1.5px dashed #c5c9d3;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: #6c63ff;
+      color: white;
+      border: none;
+      box-shadow: 0 8px 16px rgba(108, 99, 255, 0.25);
+      font-size: 1rem;
+      margin-top: 20px;
+    }
+
+    .btn-primary:hover {
+      background: #5b52e0;
+      box-shadow: 0 12px 20px rgba(108, 99, 255, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px dashed #6c63ff;
+      color: #6c63ff;
+      font-weight: 500;
+    }
+
+    .btn-outline:hover {
+      background: rgba(108, 99, 255, 0.04);
+    }
+
+    /* INVOICE PREVIEW */
+    .invoice-preview {
+      display: none;
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 32px 28px;
+      margin-top: 32px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.06);
+      border: 1px solid #eff2f7;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .invoice-preview h2 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e1e2f;
+      margin-bottom: 24px;
+      text-transform: none;
+      letter-spacing: -0.5px;
+    }
+
+    .invoice-preview h2::before {
+      display: none;
+    }
+
+    #previewContent table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    #previewContent th {
+      text-align: left;
+      padding: 12px;
+      background: #f4f6ff;
+      color: #4a45b2;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border-bottom: 2px solid #e0e0ff;
+    }
+
+    #previewContent td {
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f5;
+      color: #333;
+    }
+
+    #previewContent h3 {
+      text-align: right;
+      font-size: 1.3rem;
+      margin-top: 20px;
+      color: #1e1e2f;
+    }
+
+    #printBtn {
+      background: #1e1e2f;
+      color: white;
+      width: 100%;
+      margin-top: 24px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #printBtn:hover {
+      background: #000;
+    }
+
+    hr {
+      border: 0;
+      height: 1px;
+      background: #e8eaf0;
+      margin: 16px 0;
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      .container {
+        box-shadow: none;
+        padding: 0;
+      }
+      .form-section,
+      .header,
+      #addItem, #generateBtn, #printBtn {
+        display: none !important;
+      }
+      .invoice-preview {
+        display: block !important;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      .item-row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <svg viewBox="0 0 24 24" width="42" height="42"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM8 13h8v2H8v-2zm0 4h8v2H8v-2zm0-8h3v2H8V9z"/></svg>
+      <h1>Invoice Generator</h1>
+    </div>
+
+    <div class="form-section">
+      <h2>Your Details</h2>
+      <input type="text" id="yourName" placeholder="Your name or business name" required>
+      <input type="email" id="yourEmail" placeholder="you@example.com" required>
+
+      <h2>Client Details</h2>
+      <input type="text" id="clientName" placeholder="Client full name" required>
+      <input type="email" id="clientEmail" placeholder="client@example.com" required>
+
+      <h2>Invoice Details</h2>
+      <input type="text" id="invoiceNumber" placeholder="e.g. INV-001" required>
+      <input type="date" id="invoiceDate" required>
+
+      <h2>Services</h2>
+      <div id="itemsContainer">
+        <div class="item-row">
+          <input type="text" placeholder="Service description" class="desc-input" required>
+          <input type="number" placeholder="Amount (₦)" class="amount-input" step="0.01" min="0" required>
+        </div>
+      </div>
+      <button class="btn btn-outline" id="addItem">
+        <span>+</span> Add Another Service
+      </button>
+
+      <button class="btn btn-primary" id="generateBtn">
+        <span>✨</span> Generate Invoice
+      </button>
+    </div>
+
+    <div class="invoice-preview" id="invoicePreview">
+      <h2>INVOICE</h2>
+      <div id="previewContent"></div>
+      <button id="printBtn">🖨️ Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <script src="script.js">
+// DOM elements
+const generateBtn = document.getElementById('generateBtn');
+const addItemBtn = document.getElementById('addItem');
+const itemsContainer = document.getElementById('itemsContainer');
+const invoicePreview = document.getElementById('invoicePreview');
+const previewContent = document.getElementById('previewContent');
+const printBtn = document.getElementById('printBtn');
+
+const yourName = document.getElementById('yourName');
+const yourEmail = document.getElementById('yourEmail');
+const clientName = document.getElementById('clientName');
+const clientEmail = document.getElementById('clientEmail');
+const invoiceNumber = document.getElementById('invoiceNumber');
+const invoiceDate = document.getElementById('invoiceDate');
+
+// Ensure preview is hidden on page load
+invoicePreview.style.display = 'none';
+
+// 1. ADD NEW SERVICE ROW
+addItemBtn.addEventListener('click', function() {
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.innerHTML = `
+    <input type="text" placeholder="Service description" class="desc-input" required>
+    <input type="number" placeholder="Amount (₦)" class="amount-input" step="0.01" min="0" required>
+  `;
+  itemsContainer.appendChild(row);
+});
+
+// 2. GENERATE INVOICE
+generateBtn.addEventListener('click', function() {
+  
+  if (!yourName.value || !clientName.value || !invoiceNumber.value || !invoiceDate.value) {
+    alert('Please fill in all required fields before generating the invoice.');
+    return;
+  }
+  
+  const rows = itemsContainer.querySelectorAll('.item-row');
+  let itemsHTML = '';
+  let total = 0;
+  
+  rows.forEach(row => {
+    const descInput = row.querySelector('.desc-input');
+    const amountInput = row.querySelector('.amount-input');
+    const desc = descInput?.value.trim() || '—';
+    const amount = parseFloat(amountInput?.value) || 0;
+    total += amount;
+    itemsHTML += `
+      <tr>
+        <td>${desc}</td>
+        <td style="text-align:right;">₦${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      </tr>
+    `;
+  });
+  
+  const invoiceHTML = `
+    <div class="invoice">
+      <p><strong>Invoice #:</strong> ${invoiceNumber.value || '—'}</p>
+      <p><strong>Date:</strong> ${invoiceDate.value || '—'}</p>
+      <hr>
+      <p><strong>From:</strong><br>${yourName.value || '—'}<br>${yourEmail.value || '—'}</p>
+      <p><strong>To:</strong><br>${clientName.value || '—'}<br>${clientEmail.value || '—'}</p>
+      <hr>
+      <table>
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th style="text-align:right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsHTML}
+        </tbody>
+      </table>
+      <h3>Total: ₦${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+    </div>
+  `;
+  
+  previewContent.innerHTML = invoiceHTML;
+  invoicePreview.style.display = 'block';
+  invoicePreview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+// 3. PRINT
+printBtn.addEventListener('click', function() {
+  window.print();
+});
+ 
+  </script>
+</body>
+</html>

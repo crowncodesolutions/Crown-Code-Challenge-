@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Programme Builder — Crown Code Solutions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      padding: 30px 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* HEADER */
+    .page-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .page-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+      color: rgba(255,255,255,0.5);
+      margin-top: 8px;
+      font-size: 15px;
+    }
+
+    .crown {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    /* FORM CARD */
+    .form-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #6c63ff;
+      margin: 24px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e8eaf0;
+    }
+
+    .section-label:first-of-type {
+      margin-top: 0;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1.5px solid #e2e6ed;
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      color: #2d2d3a;
+      background: #fafbfc;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #6c63ff;
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+      background: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* AGENDA ITEMS */
+    #agendaContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .agenda-row {
+      display: grid;
+      grid-template-columns: 120px 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .agenda-row input {
+      margin-bottom: 0;
+    }
+
+    .remove-btn {
+      background: #fff0f0;
+      color: #e74c3c;
+      border: 1.5px solid #ffd5d5;
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .remove-btn:hover {
+      background: #e74c3c;
+      color: white;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      width: 100%;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px dashed #6c63ff;
+      color: #6c63ff;
+    }
+
+    .btn-outline:hover {
+      background: rgba(108,99,255,0.05);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6c63ff, #a855f7);
+      color: white;
+      box-shadow: 0 8px 20px rgba(108,99,255,0.35);
+      margin-top: 16px;
+      font-size: 16px;
+      padding: 14px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(108,99,255,0.45);
+    }
+
+    /* PROGRAMME PREVIEW */
+    .programme-preview {
+      display: none;
+      background: #fff;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+      animation: fadeUp 0.4s ease;
+      margin-bottom: 24px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* PROGRAMME DESIGN */
+    .prog-header {
+      background: linear-gradient(135deg, #0f0c29, #302b63);
+      color: white;
+      padding: 48px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prog-header::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(108,99,255,0.2);
+    }
+
+    .prog-header::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: -40px;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: rgba(168,85,247,0.15);
+    }
+
+    .prog-event-type {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .prog-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .prog-meta {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .prog-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .prog-meta-item span.icon {
+      font-size: 16px;
+    }
+
+    /* PROGRAMME BODY */
+    .prog-body {
+      padding: 40px;
+    }
+
+    .prog-theme {
+      background: linear-gradient(135deg, #f4f2ff, #faf0ff);
+      border-left: 4px solid #6c63ff;
+      border-radius: 0 12px 12px 0;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+      font-style: italic;
+      color: #4a45b2;
+      font-size: 15px;
+    }
+
+    .prog-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #6c63ff;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #f0f0ff;
+    }
+
+    .agenda-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 32px;
+    }
+
+    .agenda-table tr {
+      border-bottom: 1px solid #f5f5f5;
+      transition: background 0.15s;
+    }
+
+    .agenda-table tr:hover {
+      background: #fafafa;
+    }
+
+    .agenda-table td {
+      padding: 14px 12px;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    .agenda-table td:first-child {
+      font-weight: 600;
+      color: #6c63ff;
+      white-space: nowrap;
+      width: 120px;
+      font-size: 13px;
+    }
+
+    .agenda-table td:last-child {
+      color: #444;
+    }
+
+    /* OFFICIATING */
+    .officiating-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .official-card {
+      background: #f9fafc;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .official-role {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #999;
+      margin-bottom: 4px;
+    }
+
+    .official-name {
+      font-weight: 600;
+      color: #1e1e2f;
+      font-size: 15px;
+    }
+
+    /* FOOTER */
+    .prog-footer {
+      background: #fafbfc;
+      border-top: 1px solid #f0f0f5;
+      padding: 24px 40px;
+      text-align: center;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .prog-footer strong {
+      color: #6c63ff;
+    }
+
+    /* PRINT BUTTON */
+    .print-btn {
+      background: #1e1e2f;
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .print-btn:hover {
+      background: #000;
+    }
+
+    /* PRINT STYLES */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      .form-card, .page-header, .print-btn {
+        display: none !important;
+      }
+      .programme-preview {
+        display: block !important;
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
+
+    /* MOBILE */
+    @media (max-width: 600px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+      .agenda-row {
+        grid-template-columns: 100px 1fr auto;
+      }
+      .prog-title {
+        font-size: 26px;
+      }
+      .prog-body {
+        padding: 24px 20px;
+      }
+      .prog-header {
+        padding: 36px 20px;
+      }
+      .officiating-grid {
+        grid-template-columns: 1fr;
+      }
+      .prog-footer {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <span class="crown">👑</span>
+      <h1>Event Programme Builder</h1>
+      <p>Crown Code Solutions — Fill in the details and generate your programme instantly</p>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="form-card">
+
+      <div class="section-label">Event Info</div>
+      <input type="text" id="eventName" placeholder="Event Name e.g. Annual Thanksgiving Service">
+      <input type="text" id="eventType" placeholder="Event Type e.g. Church Service, Wedding, Conference">
+      <div class="two-col">
+        <input type="date" id="eventDate">
+        <input type="time" id="eventTime">
+      </div>
+      <input type="text" id="eventVenue" placeholder="Venue e.g. Grace Cathedral, Lagos">
+
+      <div class="section-label">Theme & Message</div>
+      <input type="text" id="eventTheme" placeholder='Theme e.g. "Walking in the Light"'>
+
+      <div class="section-label">Officiating Ministers / Hosts</div>
+      <div class="two-col">
+        <input type="text" id="host1Name" placeholder="Host / Presiding Name">
+        <input type="text" id="host1Role" placeholder="Role e.g. Senior Pastor">
+      </div>
+      <div class="two-col">
+        <input type="text" id="host2Name" placeholder="Second Official (optional)">
+        <input type="text" id="host2Role" placeholder="Role e.g. Master of Ceremony">
+      </div>
+
+      <div class="section-label">Programme Agenda</div>
+      <div id="agendaContainer">
+        <div class="agenda-row">
+          <input type="text" placeholder="Time e.g. 9:00 AM" class="time-input">
+          <input type="text" placeholder="Activity e.g. Opening Prayer" class="activity-input">
+          <button class="remove-btn" onclick="removeRow(this)">✕</button>
+        </div>
+      </div>
+      <button class="btn btn-outline" id="addAgenda">+ Add Agenda Item</button>
+
+      <div class="section-label">Closing Info</div>
+      <input type="text" id="closingNote" placeholder='Closing note e.g. "Light refreshments will be served"'>
+
+      <button class="btn btn-primary" id="generateBtn">✨ Generate Programme</button>
+    </div>
+
+    <!-- PROGRAMME PREVIEW -->
+    <div class="programme-preview" id="programmePreview">
+
+      <div class="prog-header">
+        <div class="prog-event-type" id="previewType"></div>
+        <div class="prog-title" id="previewTitle"></div>
+        <div class="prog-meta">
+          <div class="prog-meta-item"><span class="icon">📅</span> <span id="previewDate"></span></div>
+          <div class="prog-meta-item"><span class="icon">🕐</span> <span id="previewTime"></span></div>
+          <div class="prog-meta-item"><span class="icon">📍</span> <span id="previewVenue"></span></div>
+        </div>
+      </div>
+
+      <div class="prog-body">
+        <div class="prog-theme" id="previewTheme"></div>
+
+        <div class="prog-section-title">Order of Programme</div>
+        <table class="agenda-table" id="previewAgenda"></table>
+
+        <div class="prog-section-title">Officiating</div>
+        <div class="officiating-grid" id="previewOfficiating"></div>
+
+        <div class="prog-section-title">Note</div>
+        <p id="previewClosing" style="color:#555; font-size:14px; line-height:1.6;"></p>
+      </div>
+
+      <div class="prog-footer">
+        Programme generated by <strong>Crown Code Solutions</strong> 👑
+      </div>
+    </div>
+
+    <!-- PRINT BUTTON -->
+    <button class="print-btn" id="printBtn" style="display:none;">
+      🖨️ Print / Save as PDF
+    </button>
+
+  </div>
+
+  <script>
+    // DOM Elements
+    const generateBtn = document.getElementById('generateBtn');
+    const addAgendaBtn = document.getElementById('addAgenda');
+    const agendaContainer = document.getElementById('agendaContainer');
+    const programmePreview = document.getElementById('programmePreview');
+    const printBtn = document.getElementById('printBtn');
+
+    const eventName = document.getElementById('eventName');
+    const eventType = document.getElementById('eventType');
+    const eventDate = document.getElementById('eventDate');
+    const eventTime = document.getElementById('eventTime');
+    const eventVenue = document.getElementById('eventVenue');
+    const eventTheme = document.getElementById('eventTheme');
+    const host1Name = document.getElementById('host1Name');
+    const host1Role = document.getElementById('host1Role');
+    const host2Name = document.getElementById('host2Name');
+    const host2Role = document.getElementById('host2Role');
+    const closingNote = document.getElementById('closingNote');
+
+    // Add agenda row
+    addAgendaBtn.addEventListener('click', function () {
+      const row = document.createElement('div');
+      row.className = 'agenda-row';
+      row.innerHTML = `
+        <input type="text" placeholder="Time e.g. 10:00 AM" class="time-input">
+        <input type="text" placeholder="Activity" class="activity-input">
+        <button class="remove-btn" onclick="removeRow(this)">✕</button>
+      `;
+      agendaContainer.appendChild(row);
+    });
+
+    // Remove agenda row
+    function removeRow(btn) {
+      const rows = agendaContainer.querySelectorAll('.agenda-row');
+      if (rows.length > 1) {
+        btn.parentElement.remove();
+      } else {
+        alert('You need at least one agenda item.');
+      }
+    }
+
+    // Format date nicely
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      const date = new Date(dateStr + 'T00:00:00');
+      return date.toLocaleDateString('en-NG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    // Format time nicely
+    function formatTime(timeStr) {
+      if (!timeStr) return '—';
+      const [h, m] = timeStr.split(':');
+      const hour = parseInt(h);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour % 12 || 12;
+      return `${hour12}:${m} ${ampm}`;
+    }
+
+    // Generate programme
+    generateBtn.addEventListener('click', function () {
+
+      // Validation
+      if (!eventName.value || !eventDate.value || !eventVenue.value) {
+        alert('Please fill in the Event Name, Date and Venue before generating.');
+        return;
+      }
+
+      // Populate header
+      document.getElementById('previewType').textContent = eventType.value || 'Event Programme';
+      document.getElementById('previewTitle').textContent = eventName.value;
+      document.getElementById('previewDate').textContent = formatDate(eventDate.value);
+      document.getElementById('previewTime').textContent = formatTime(eventTime.value);
+      document.getElementById('previewVenue').textContent = eventVenue.value || '—';
+
+      // Theme
+      const themeEl = document.getElementById('previewTheme');
+      if (eventTheme.value) {
+        themeEl.textContent = `Theme: ${eventTheme.value}`;
+        themeEl.style.display = 'block';
+      } else {
+        themeEl.style.display = 'none';
+      }
+
+      // Agenda
+      const rows = agendaContainer.querySelectorAll('.agenda-row');
+      let agendaHTML = '';
+      rows.forEach(row => {
+        const time = row.querySelector('.time-input').value || '—';
+        const activity = row.querySelector('.activity-input').value || '—';
+        agendaHTML += `
+          <tr>
+            <td>${time}</td>
+            <td>${activity}</td>
+          </tr>
+        `;
+      });
+      document.getElementById('previewAgenda').innerHTML = agendaHTML;
+
+      // Officiating
+      let officialHTML = '';
+      if (host1Name.value) {
+        officialHTML += `
+          <div class="official-card">
+            <div class="official-role">${host1Role.value || 'Host'}</div>
+            <div class="official-name">${host1Name.value}</div>
+          </div>
+        `;
+      }
+      if (host2Name.value) {
+        officialHTML += `
+          <div class="official-card">
+            <div class="official-role">${host2Role.value || 'Official'}</div>
+            <div class="official-name">${host2Name.value}</div>
+          </div>
+        `;
+      }
+      document.getElementById('previewOfficiating').innerHTML = officialHTML || '<p style="color:#aaa; font-size:14px;">No officials added.</p>';
+
+      // Closing note
+      document.getElementById('previewClosing').textContent = closingNote.value || '—';
+
+      // Show preview and print button
+      programmePreview.style.display = 'block';
+      printBtn.style.display = 'flex';
+      programmePreview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    // Print
+    printBtn.addEventListener('click', function () {
+      window.print();
+    });
+  </script>
+
+</body>
+</html>

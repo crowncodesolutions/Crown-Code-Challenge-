@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Countdown — Crown Code Solutions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #6c63ff;
+      --secondary: #a855f7;
+      --accent: #06b6d4;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #08080f;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* BACKGROUND GLOW */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 780px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* BRAND */
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    .brand svg { fill: rgba(255,255,255,0.3); }
+    .brand span {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    /* SETUP PANEL */
+    .setup-panel {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px;
+      padding: 36px 32px;
+      backdrop-filter: blur(20px);
+      margin-bottom: 32px;
+    }
+
+    .setup-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setup-title svg { fill: var(--primary); }
+
+    .input-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-wrap label {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    input[type="text"],
+    input[type="datetime-local"] {
+      width: 100%;
+      padding: 13px 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      color: #ffffff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    input[type="text"]::placeholder { color: rgba(255,255,255,0.25); }
+
+    input[type="text"]:focus,
+    input[type="datetime-local"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+      background: rgba(108,99,255,0.08);
+    }
+
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) opacity(0.4);
+      cursor: pointer;
+    }
+
+    /* THEME PICKER */
+    .theme-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .theme-grid {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .theme-btn {
+      padding: 8px 16px;
+      border-radius: 100px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .theme-btn .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .theme-btn.active,
+    .theme-btn:hover {
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08);
+      color: white;
+    }
+
+    .start-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.25s;
+      box-shadow: 0 8px 24px rgba(108,99,255,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .start-btn svg { fill: white; }
+    .start-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(108,99,255,0.5); }
+
+    /* COUNTDOWN DISPLAY */
+    .countdown-display { display: none; }
+
+    .event-header { text-align: center; margin-bottom: 40px; }
+
+    .event-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #a78bfa;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .event-badge svg { fill: #a78bfa; }
+
+    .event-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .event-date-display {
+      font-size: 14px;
+      color: rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .event-date-display svg { fill: rgba(255,255,255,0.4); }
+
+    /* COUNTDOWN UNITS */
+    .countdown-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .unit-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 28px 12px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+
+    .unit-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .unit-card.active::before { opacity: 1; }
+    .unit-card.active { border-color: rgba(108,99,255,0.3); }
+
+    .unit-number {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+      transition: transform 0.15s ease;
+    }
+
+    .unit-number.tick {
+      transform: scale(1.06);
+    }
+
+    .unit-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* PROGRESS BAR */
+    .progress-section { margin-bottom: 28px; }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .progress-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .progress-pct {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .progress-track {
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 100px;
+      transition: width 1s linear;
+      width: 0%;
+    }
+
+    /* ACTION BUTTONS */
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .action-btn {
+      padding: 13px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .action-btn svg { fill: rgba(255,255,255,0.5); transition: fill 0.2s; }
+
+    .action-btn:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .action-btn:hover svg { fill: white; }
+
+    .action-btn.danger:hover {
+      background: rgba(239,68,68,0.1);
+      border-color: rgba(239,68,68,0.3);
+      color: #f87171;
+    }
+
+    .action-btn.danger:hover svg { fill: #f87171; }
+
+    /* EXPIRED STATE */
+    .expired-banner {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .expired-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 12px 28px rgba(251,191,36,0.3);
+    }
+
+    .expired-icon svg { fill: white; }
+
+    .expired-banner h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      color: white;
+      margin-bottom: 10px;
+    }
+
+    .expired-banner p { font-size: 15px; color: rgba(255,255,255,0.4); margin-bottom: 28px; }
+
+    /* MULTIPLE COUNTDOWNS LIST */
+    .saved-list {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .saved-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .saved-item:hover {
+      background: rgba(108,99,255,0.08);
+      border-color: rgba(108,99,255,0.25);
+    }
+
+    .saved-item-left { display: flex; align-items: center; gap: 14px; }
+
+    .saved-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      flex-shrink: 0;
+    }
+
+    .saved-name { font-size: 14px; font-weight: 600; color: white; margin-bottom: 3px; }
+    .saved-date { font-size: 12px; color: rgba(255,255,255,0.35); }
+
+    .saved-time-left {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* THEMES */
+    body.theme-purple { --primary: #6c63ff; --secondary: #a855f7; }
+    body.theme-cyan { --primary: #06b6d4; --secondary: #0284c7; }
+    body.theme-green { --primary: #22c55e; --secondary: #16a34a; }
+    body.theme-rose { --primary: #f43f5e; --secondary: #e11d48; }
+    body.theme-amber { --primary: #f59e0b; --secondary: #d97706; }
+
+    @media (max-width: 540px) {
+      .setup-panel { padding: 24px 18px; }
+      .input-group { grid-template-columns: 1fr; }
+      .countdown-grid { gap: 10px; }
+      .unit-card { padding: 20px 8px 16px; border-radius: 18px; }
+      .unit-label { font-size: 10px; letter-spacing: 1px; }
+      .action-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="theme-purple">
+
+  <div class="wrapper">
+
+    <!-- BRAND -->
+    <div class="brand">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      <span>Crown Code Solutions</span>
+    </div>
+
+    <!-- SETUP PANEL -->
+    <div class="setup-panel" id="setupPanel">
+      <div class="setup-title">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+        Create Countdown
+      </div>
+
+      <div class="input-group">
+        <div class="input-wrap">
+          <label>Event Name</label>
+          <input type="text" id="eventName" placeholder="e.g. My Wedding Day">
+        </div>
+        <div class="input-wrap">
+          <label>Event Date & Time</label>
+          <input type="datetime-local" id="eventDate">
+        </div>
+      </div>
+
+      <span class="theme-label">Choose Theme</span>
+      <div class="theme-grid">
+        <button class="theme-btn active" onclick="setTheme('purple', this)">
+          <span class="dot" style="background: #6c63ff;"></span> Royal
+        </button>
+        <button class="theme-btn" onclick="setTheme('cyan', this)">
+          <span class="dot" style="background: #06b6d4;"></span> Ocean
+        </button>
+        <button class="theme-btn" onclick="setTheme('green', this)">
+          <span class="dot" style="background: #22c55e;"></span> Forest
+        </button>
+        <button class="theme-btn" onclick="setTheme('rose', this)">
+          <span class="dot" style="background: #f43f5e;"></span> Rose
+        </button>
+        <button class="theme-btn" onclick="setTheme('amber', this)">
+          <span class="dot" style="background: #f59e0b;"></span> Amber
+        </button>
+      </div>
+
+      <button class="start-btn" id="startBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        Start Countdown
+      </button>
+
+      <!-- SAVED COUNTDOWNS -->
+      <div class="saved-list" id="savedList"></div>
+    </div>
+
+    <!-- COUNTDOWN DISPLAY -->
+    <div class="countdown-display" id="countdownDisplay">
+
+      <div class="event-header">
+        <div class="event-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+          Counting Down
+        </div>
+        <div class="event-name" id="displayName"></div>
+        <div class="event-date-display">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+          <span id="displayDate"></span>
+        </div>
+      </div>
+
+      <!-- COUNTDOWN UNITS -->
+      <div class="countdown-grid">
+        <div class="unit-card" id="daysCard">
+          <div class="unit-number" id="days">00</div>
+          <div class="unit-label">Days</div>
+        </div>
+        <div class="unit-card" id="hoursCard">
+          <div class="unit-number" id="hours">00</div>
+          <div class="unit-label">Hours</div>
+        </div>
+        <div class="unit-card" id="minutesCard">
+          <div class="unit-number" id="minutes">00</div>
+          <div class="unit-label">Minutes</div>
+        </div>
+        <div class="unit-card" id="secondsCard">
+          <div class="unit-number" id="seconds">00</div>
+          <div class="unit-label">Seconds</div>
+        </div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="progress-section">
+        <div class="progress-top">
+          <span class="progress-label">Time Elapsed</span>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <!-- EXPIRED BANNER -->
+      <div class="expired-banner" id="expiredBanner">
+        <div class="expired-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24"><path d="M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3c4.86-2.34 8-7 8-11.5C20 5.81 16.19 2 11.5 2zm1 14.5h-2v-2h2v2zm0-4h-2c0-3.25 3-3 3-5 0-1.1-.9-2-2-2s-2 .9-2 2h-2c0-2.21 1.79-4 4-4s4 1.79 4 4c0 2.5-3 2.75-3 5z"/></svg>
+        </div>
+        <h2>Time's Up!</h2>
+        <p id="expiredName"></p>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="action-row">
+        <button class="action-btn" id="editBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          Edit Event
+        </button>
+        <button class="action-btn danger" id="resetBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          Delete
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    let countdownInterval = null;
+    let targetDate = null;
+    let startDate = null;
+    let savedCountdowns = [];
+
+    // DOM
+    const setupPanel = document.getElementById('setupPanel');
+    const countdownDisplay = document.getElementById('countdownDisplay');
+    const startBtn = document.getElementById('startBtn');
+    const editBtn = document.getElementById('editBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // SET THEME
+    function setTheme(theme, btn) {
+      document.body.className = `theme-${theme}`;
+      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // FORMAT DATE
+    function formatDisplayDate(date) {
+      return date.toLocaleDateString('en-NG', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    // PAD NUMBERS
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    // TICK ANIMATION
+    function triggerTick(el) {
+      el.classList.remove('tick');
+      void el.offsetWidth;
+      el.classList.add('tick');
+      setTimeout(() => el.classList.remove('tick'), 150);
+    }
+
+    // UPDATE COUNTDOWN
+    function updateCountdown() {
+      const now = new Date();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        clearInterval(countdownInterval);
+        document.getElementById('days').textContent = '00';
+        document.getElementById('hours').textContent = '00';
+        document.getElementById('minutes').textContent = '00';
+        document.getElementById('seconds').textContent = '00';
+        document.getElementById('expiredBanner').style.display = 'block';
+        document.getElementById('expiredName').textContent = `${document.getElementById('displayName').textContent} has arrived!`;
+        document.getElementById('progressFill').style.width = '100%';
+        document.getElementById('progressPct').textContent = '100%';
+        return;
+      }
+
+      const totalSeconds = Math.floor(diff / 1000);
+      const d = Math.floor(totalSeconds / 86400);
+      const h = Math.floor((totalSeconds % 86400) / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = totalSeconds % 60;
+
+      const dEl = document.getElementById('days');
+      const hEl = document.getElementById('hours');
+      const mEl = document.getElementById('minutes');
+      const sEl = document.getElementById('seconds');
+
+      if (dEl.textContent !== pad(d)) { dEl.textContent = pad(d); triggerTick(dEl); }
+      if (hEl.textContent !== pad(h)) { hEl.textContent = pad(h); triggerTick(hEl); }
+      if (mEl.textContent !== pad(m)) { mEl.textContent = pad(m); triggerTick(mEl); }
+      sEl.textContent = pad(s);
+      triggerTick(sEl);
+
+      // Active card highlight
+      document.getElementById('daysCard').classList.toggle('active', d > 0);
+      document.getElementById('hoursCard').classList.toggle('active', d === 0 && h > 0);
+      document.getElementById('minutesCard').classList.toggle('active', d === 0 && h === 0 && m > 0);
+      document.getElementById('secondsCard').classList.toggle('active', d === 0 && h === 0 && m === 0);
+
+      // Progress
+      if (startDate) {
+        const total = targetDate - startDate;
+        const elapsed = now - startDate;
+        const pct = Math.min(100, Math.max(0, Math.round((elapsed / total) * 100)));
+        document.getElementById('progressFill').style.width = `${pct}%`;
+        document.getElementById('progressPct').textContent = `${pct}%`;
+      }
+    }
+
+    // START COUNTDOWN
+    function startCountdown(name, dateStr, isFromSaved = false) {
+      const date = new Date(dateStr);
+      if (isNaN(date)) { alert('Please enter a valid date and time.'); return; }
+      if (date <= new Date() && !isFromSaved) { alert('Please choose a future date and time.'); return; }
+
+      targetDate = date;
+      if (!isFromSaved) startDate = new Date();
+
+      document.getElementById('displayName').textContent = name;
+      document.getElementById('displayDate').textContent = formatDisplayDate(date);
+      document.getElementById('expiredBanner').style.display = 'none';
+
+      setupPanel.style.display = 'none';
+      countdownDisplay.style.display = 'block';
+
+      if (countdownInterval) clearInterval(countdownInterval);
+      updateCountdown();
+      countdownInterval = setInterval(updateCountdown, 1000);
+
+      // Save to list
+      if (!isFromSaved) {
+        const existing = savedCountdowns.findIndex(c => c.name === name);
+        if (existing === -1) {
+          savedCountdowns.unshift({ name, dateStr, startDate: new Date().toISOString() });
+        }
+        renderSavedList();
+      }
+    }
+
+    // RENDER SAVED LIST
+    function renderSavedList() {
+      const list = document.getElementById('savedList');
+      if (savedCountdowns.length === 0) { list.innerHTML = ''; return; }
+
+      list.innerHTML = savedCountdowns.map((c, i) => {
+        const d = new Date(c.dateStr);
+        const diff = d - new Date();
+        let timeLeft = '';
+        if (diff <= 0) {
+          timeLeft = 'Expired';
+        } else {
+          const days = Math.floor(diff / 86400000);
+          const hours = Math.floor((diff % 86400000) / 3600000);
+          timeLeft = days > 0 ? `${days}d ${hours}h left` : `${hours}h left`;
+        }
+        return `
+          <div class="saved-item" onclick="loadSaved(${i})">
+            <div class="saved-item-left">
+              <div class="saved-dot"></div>
+              <div>
+                <div class="saved-name">${c.name}</div>
+                <div class="saved-date">${new Date(c.dateStr).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+              </div>
+            </div>
+            <div class="saved-time-left">${timeLeft}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function loadSaved(index) {
+      const c = savedCountdowns[index];
+      startDate = new Date(c.startDate);
+      startCountdown(c.name, c.dateStr, true);
+    }
+
+    // START BUTTON
+    startBtn.addEventListener('click', () => {
+      const name = document.getElementById('eventName').value.trim();
+      const dateStr = document.getElementById('eventDate').value;
+      if (!name) { alert('Please enter an event name.'); return; }
+      if (!dateStr) { alert('Please select a date and time.'); return; }
+      startCountdown(name, dateStr);
+    });
+
+    // EDIT
+    editBtn.addEventListener('click', () => {
+      if (countdownInterval) clearInterval(countdownInterval);
+      countdownDisplay.style.display = 'none';
+      setupPanel.style.display = 'block';
+      renderSavedList();
+    });
+
+    // DELETE
+    resetBtn.addEventListener('click', () => {
+      if (!confirm('Delete this countdown?')) return;
+      if (countdownInterval) clearInterval(countdownInterval);
+      const name = document.getElementById('displayName').textContent;
+      savedCountdowns = savedCountdowns.filter(c => c.name !== name);
+      countdownDisplay.style.display = 'none';
+      setupPanel.style.display = 'block';
+      document.getElementById('eventName').value = '';
+      document.getElementById('eventDate').value = '';
+      renderSavedList();
+    });
+  </script>
+
+</body>
+</html>
